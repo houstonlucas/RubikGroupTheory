@@ -9,6 +9,7 @@ from pyglet import shapes
 from pyglet.graphics import Batch
 from pyglet.gl import *
 
+WINDOW_WIDTH = 1500
 
 def main():
     window = SimWindow()
@@ -17,7 +18,7 @@ def main():
 
 class SimWindow(pyglet.window.Window):
     def __init__(self):
-        super(SimWindow, self).__init__(600, 600)
+        super(SimWindow, self).__init__(WINDOW_WIDTH, WINDOW_WIDTH)
         self.sim_dt = 1.0 / 60.0
 
         state_array = PLL_State.solved_PLL_state()
@@ -31,7 +32,7 @@ class SimWindow(pyglet.window.Window):
 
         state_array = get_permuted_state(state_array, P)
 
-        self.pll_state = PLL_State(state_array, position=(self.width / 2.0, self.height / 2.0), width=600)
+        self.pll_state = PLL_State(state_array, position=(self.width / 2.0, self.height / 2.0), width=self.width)
 
     def sim_start(self):
         glClearColor(0.5, 0.5, 0.5, 1.0)
