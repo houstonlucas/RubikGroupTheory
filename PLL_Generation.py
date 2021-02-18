@@ -96,7 +96,6 @@ class PLL_State:
                     color=color, batch=batch
                 )
                 self.rects.append(rect)
-        self.last_update = time.time()
 
     def draw(self):
         self.batch.draw()
