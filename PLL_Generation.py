@@ -64,7 +64,7 @@ class SimWindow(pyglet.window.Window):
 
 class PLL_State:
     tiles: ndarray
-    position: Tuple[float]
+    permutation: ndarray
 
     colors = {
         "yellow": (255, 255, 0),
@@ -76,11 +76,27 @@ class PLL_State:
     }
     color_names = list(colors.keys())
 
-    def __init__(self, tiles: np.ndarray):
+    def __init__(self, tiles: ndarray = None, permutation: ndarray = None):
         self.tiles = tiles
+        self.permutation = permutation
+        if self.tiles is None:
+            self.tiles = PLL_State.solved_pll_tiles()
+        if self.permutation is None:
+            self.permutation = np.eye(25)
+
+    def __mul__(self, other) -> PLL_State:
+        # self * other
+        if type(other) == self.__class__:
+            rhs_permutation = other.permutation
+        elif type(other == ndarray):
+            rhs_permutation = other
+
+        endPermutation = self.permutation @ rhs_permutation
+        end_tiles = get_permuted_tiles(PLL_State.solved_pll_tiles(), rhs_permutation)
+        return PLL_State(end_tiles, endPermutation)
 
     @staticmethod
-    def solved_pll_state() -> ndarray:
+    def solved_pll_tiles() -> ndarray:
         state_array = np.zeros((5, 5), dtype=np.int)
         state_array[0, 1:4] = PLL_State.get_color_idx("green")
         state_array[-1, 1:4] = PLL_State.get_color_idx("blue")
@@ -145,7 +161,7 @@ def create_permutation_matrix(i: int, j: int, n: int) -> ndarray:
     return Pij
 
 
-def get_permuted_state(state: ndarray, permutation: ndarray) -> ndarray:
+def get_permuted_tiles(state: ndarray, permutation: ndarray) -> ndarray:
     state_shape = state.shape
     return (permutation @ state.reshape(-1)).reshape(state_shape)
 
