@@ -21,7 +21,7 @@ def main():
     edge_cycle = p10_14 @ p10_22
     Pinv = edge_cycle.T
 
-    pll_state_drawer = PLL_StateDrawer()
+    pll_state_drawer = PllStatedrawer()
     generated_state_list = generate_state_list(edge_cycle, 3)
     pll_state_drawer.prepare_pll_list(generated_state_list, (viewer.width, viewer.height))
 
@@ -32,7 +32,7 @@ def main():
 
 class PllViewer(pyglet.window.Window):
     sim_dt: float
-    drawers: List[PLL_StateDrawer]
+    drawers: List[PllStatedrawer]
 
     def __init__(self, width: int, height: int):
         super(PllViewer, self).__init__(width, height)
@@ -54,11 +54,11 @@ class PllViewer(pyglet.window.Window):
         for drawer in self.drawers:
             drawer.draw()
 
-    def add_drawer(self, drawer: PLL_StateDrawer):
+    def add_drawer(self, drawer: PllStatedrawer):
         self.drawers.append(drawer)
 
 
-class PLL_State:
+class PllState:
     tiles: ndarray
     permutation: ndarray
 
@@ -76,11 +76,11 @@ class PLL_State:
         self.tiles = tiles
         self.permutation = permutation
         if self.tiles is None:
-            self.tiles = PLL_State.solved_pll_tiles()
+            self.tiles = PllState.solved_pll_tiles()
         if self.permutation is None:
             self.permutation = np.eye(25)
 
-    def __mul__(self, other) -> PLL_State:
+    def __mul__(self, other) -> PllState:
         # self * other
         rhs_permutation = None
         if type(other) == self.__class__:
@@ -91,24 +91,24 @@ class PLL_State:
 
         resultant_permutation = self.permutation @ rhs_permutation
         resultant_tiles = get_permuted_tiles(self.tiles, rhs_permutation)
-        resultant_state = PLL_State(resultant_tiles, resultant_permutation)
+        resultant_state = PllState(resultant_tiles, resultant_permutation)
         return resultant_state
 
     @staticmethod
     def solved_pll_tiles() -> ndarray:
         state_array = np.zeros((5, 5), dtype=np.int)
-        state_array[0, 1:4] = PLL_State.get_color_idx("green")
-        state_array[-1, 1:4] = PLL_State.get_color_idx("blue")
-        state_array[1:4, 0] = PLL_State.get_color_idx("orange")
-        state_array[1:4, -1] = PLL_State.get_color_idx("red")
+        state_array[0, 1:4] = PllState.get_color_idx("green")
+        state_array[-1, 1:4] = PllState.get_color_idx("blue")
+        state_array[1:4, 0] = PllState.get_color_idx("orange")
+        state_array[1:4, -1] = PllState.get_color_idx("red")
         return state_array
 
     @staticmethod
     def get_color_idx(color_name: str) -> int:
-        return PLL_State.color_names.index(color_name)
+        return PllState.color_names.index(color_name)
 
 
-class PLL_StateDrawer:
+class PllStatedrawer:
     batch: Batch
     rects: List[shapes.Rectangle]
 
@@ -117,7 +117,7 @@ class PLL_StateDrawer:
             self.batch = Batch()
         self.rects = []
 
-    def prepare_state(self, pll_state: PLL_State, position: Tuple[float], width: float):
+    def prepare_state(self, pll_state: PllState, position: Tuple[float], width: float):
 
         position = tuple(value - width / 2 for value in position)
 
@@ -136,7 +136,7 @@ class PLL_StateDrawer:
         for row_idx in range(num_rows):
             for col_idx in range(num_rows):
                 color_id = pll_state.tiles[row_idx][col_idx]
-                color = PLL_State.colors[PLL_State.color_names[color_id]]
+                color = PllState.colors[PllState.color_names[color_id]]
                 tile_x = position[0] + (col_idx + 1) * gap_size + col_idx * tile_size
                 tile_y = position[1] + width - ((row_idx + 1) * (gap_size + tile_size))
 
@@ -149,7 +149,7 @@ class PLL_StateDrawer:
                 )
                 self.rects.append(rect)
 
-    def prepare_pll_list(self, pll_states: List[PLL_State], draw_size: Tuple[float]):
+    def prepare_pll_list(self, pll_states: List[PllState], draw_size: Tuple[float]):
         tile_width, tile_height = draw_size
         num_states = len(pll_states)
         state_width = tile_width / num_states
@@ -165,8 +165,8 @@ class PLL_StateDrawer:
         self.batch.draw()
 
 
-def generate_state_list(permutation: ndarray, list_size: int) -> List[PLL_State]:
-    state_list = [PLL_State()]
+def generate_state_list(permutation: ndarray, list_size: int) -> List[PllState]:
+    state_list = [PllState()]
     for state_idx in range(1, list_size):
         state = state_list[-1] * permutation
         state_list.append(state)
