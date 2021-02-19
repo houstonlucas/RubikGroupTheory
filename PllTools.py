@@ -133,9 +133,9 @@ class PllStateDrawer:
         self.state_size = tile_size
         self.rects = []
 
-    def prepare_state(self, pll_state: PllState, state_position: Tuple[float], width: float):
+    def prepare_state(self, pll_state: PllState, state_position: Tuple[float]):
 
-        state_position = tuple(value - width / 2 for value in state_position)
+        state_position = tuple(value - self.state_size / 2 for value in state_position)
 
         r, c = pll_state.tiles.shape
         assert (r == c)
@@ -143,9 +143,9 @@ class PllStateDrawer:
 
         # Compute size of components
         gap_portion = 0.2
-        gap_size = gap_portion * width / (num_rows + 1)
+        gap_size = gap_portion * self.state_size / (num_rows + 1)
         tile_portion = 1.0 - gap_portion
-        tile_size = tile_portion * width / num_rows
+        tile_size = tile_portion * self.state_size / num_rows
 
         extremes = [0, num_rows - 1]
 
