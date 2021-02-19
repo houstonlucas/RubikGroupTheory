@@ -9,17 +9,17 @@ from pyglet import shapes
 from pyglet.graphics import Batch
 from pyglet.gl import *
 
-WINDOW_WIDTH = 1500
-
 
 def main():
-    window = SimWindow()
+    window_width = 1500
+    window_height = 500
+    window = SimWindow(window_width, window_height)
     window.sim_start()
 
 
 class SimWindow(pyglet.window.Window):
-    def __init__(self):
-        super(SimWindow, self).__init__(WINDOW_WIDTH, WINDOW_WIDTH)
+    def __init__(self, width, height):
+        super(SimWindow, self).__init__(width, height)
         self.sim_dt = 1.0 / 60.0
 
         state_array = PLL_State.solved_pll_state()
