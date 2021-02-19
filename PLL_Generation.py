@@ -115,8 +115,9 @@ class PLL_StateDrawer:
     batch: Batch
     rects: List[shapes.Rectangle]
 
-    def __init__(self):
-        self.batch = Batch()
+    def __init__(self, batch: Batch = None):
+        if batch is None:
+            self.batch = Batch()
         self.rects = []
 
     def prepare_state(self, pll_state: PLL_State, position: Tuple[float], width: float):
