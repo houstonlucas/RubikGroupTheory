@@ -13,19 +13,23 @@ from pyglet.gl import *
 
 def main():
     window_width = 1500
-    window_height = 500
+    window_height = 1500
     viewer = PllViewer(window_width, window_height)
 
     p10_14 = create_PLL_permutation(10, 14)
     p10_22 = create_PLL_permutation(10, 22)
     edge_cycle = p10_14 @ p10_22
-    Pinv = edge_cycle.T
 
-    pll_state_drawer = PllStateDrawer()
+    tile_size = 250
+    top_row_drawer = PllStateDrawer(tile_size=250, position=(tile_size, 0))
+    left_col_drawer = PllStateDrawer(tile_size=250, position=(0, tile_size))
+
     generated_state_list = generate_state_list(edge_cycle, 3)
-    pll_state_drawer.prepare_pll_list(generated_state_list, (viewer.width, viewer.height))
+    top_row_drawer.prepare_pll_list(generated_state_list)
+    left_col_drawer.prepare_pll_list(generated_state_list, as_row=False)
 
-    viewer.add_drawer(pll_state_drawer)
+    viewer.add_drawer(top_row_drawer)
+    viewer.add_drawer(left_col_drawer)
 
     viewer.start()
 
