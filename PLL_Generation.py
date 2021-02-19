@@ -155,6 +155,16 @@ class PLL_StateDrawer:
     def draw(self):
         self.batch.draw()
 
+
+def generate_state_list(permutation: ndarray, list_size: int) -> List[PLL_State]:
+    state_list = [PLL_State()]
+    for state_idx in range(1, list_size):
+        state = state_list[-1] * permutation
+        state_list.append(state)
+
+    return state_list
+
+
 def create_PLL_permutation(i: int, j: int) -> ndarray:
     return create_permutation_matrix(i, j, 25)
 
