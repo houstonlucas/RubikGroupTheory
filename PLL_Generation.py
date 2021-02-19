@@ -1,7 +1,7 @@
 from __future__ import annotations
 import random
 import time
-from typing import Tuple, List
+from typing import Tuple, List, Union
 
 import numpy as np
 import pyglet
@@ -14,43 +14,34 @@ from pyglet.gl import *
 def main():
     window_width = 1500
     window_height = 500
-    window = SimWindow(window_width, window_height)
-    window.sim_start()
+    viewer = PllViewer(window_width, window_height)
+
+    p10_14 = create_PLL_permutation(10, 14)
+    p10_22 = create_PLL_permutation(10, 22)
+    edge_cycle = p10_14 @ p10_22
+    Pinv = edge_cycle.T
+
+    pll_state_drawer = PLL_StateDrawer()
+    generated_state_list = generate_state_list(edge_cycle, 3)
+    pll_state_drawer.prepare_pll_list(generated_state_list, (viewer.width, viewer.height))
+
+    viewer.add_drawer(pll_state_drawer)
+
+    viewer.start()
 
 
-class SimWindow(pyglet.window.Window):
-    def __init__(self, width, height):
-        super(SimWindow, self).__init__(width, height)
+class PllViewer(pyglet.window.Window):
+    sim_dt: float
+    drawers: List[PLL_StateDrawer]
+
+    def __init__(self, width: int, height: int):
+        super(PllViewer, self).__init__(width, height)
         self.sim_dt = 1.0 / 60.0
+        self.drawers = []
 
-        state_array = PLL_State.solved_pll_state()
-        n = 25
-
-        P10_14 = create_permutation_matrix(10, 14, n)
-        P10_22 = create_permutation_matrix(10, 22, n)
-        P = P10_14 @ P10_22
-        Pinv = P.T
-
-        state_array2 = get_permuted_state(state_array, P)
-        state_array3 = get_permuted_state(state_array, Pinv)
-
-        pll_state = PLL_State(state_array)
-        pll_state2 = PLL_State(state_array2)
-        pll_state3 = PLL_State(state_array3)
-
-        pos1 = tuple(map(float, (self.width/4.0, self.height/4.0)))
-        pos2 = tuple(map(float, (self.width*3/4.0, self.height/4.0)))
-        pos3 = tuple(map(float, (self.width/4.0, self.height*3/4.0)))
-        state_width = self.width/4
-
-        self.pll_state_drawer = PLL_State_Drawer()
-
-        self.pll_state_drawer.prepare_state(pll_state, pos1, state_width)
-        self.pll_state_drawer.prepare_state(pll_state2, pos2, state_width)
-        self.pll_state_drawer.prepare_state(pll_state3, pos3, state_width)
-
-    def sim_start(self):
-        glClearColor(0.5, 0.5, 0.5, 1.0)
+    def start(self):
+        grey_shade = 0.25
+        glClearColor(grey_shade, grey_shade, grey_shade, 1.0)
         pyglet.clock.schedule_interval(self.my_tick, self.sim_dt)
         pyglet.app.run()
 
@@ -60,7 +51,11 @@ class SimWindow(pyglet.window.Window):
 
     def render(self):
         self.clear()
-        self.pll_state_drawer.draw()
+        for drawer in self.drawers:
+            drawer.draw()
+
+    def add_drawer(self, drawer: PLL_StateDrawer):
+        self.drawers.append(drawer)
 
 
 class PLL_State:
@@ -193,7 +188,7 @@ def create_permutation_matrix(i: int, j: int, n: int) -> ndarray:
 
 def get_permuted_tiles(state: ndarray, permutation: ndarray) -> ndarray:
     state_shape = state.shape
-    return (state.reshape(-1)@permutation).reshape(state_shape)
+    return (state.reshape(-1) @ permutation).reshape(state_shape)
 
 
 if __name__ == '__main__':
