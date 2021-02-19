@@ -116,9 +116,17 @@ class PllStateDrawer:
     batch: Batch
     rects: List[shapes.Rectangle]
 
-    def __init__(self, batch: Batch = None):
-        if batch is None:
+    def __init__(self, batch: Batch = None, position: Tuple[float] = None, tile_size: float = 500):
+        if batch is not None:
+            self.batch = batch
+        else:
             self.batch = Batch()
+
+        if position is not None:
+            self.position = position
+        else:
+            self.position = (0.0, 0.0)
+        self.state_size = tile_size
         self.rects = []
 
     def prepare_state(self, pll_state: PllState, state_position: Tuple[float], width: float):
@@ -141,8 +149,8 @@ class PllStateDrawer:
             for col_idx in range(num_rows):
                 color_id = pll_state.tiles[row_idx][col_idx]
                 color = PllState.colors[PllState.color_names[color_id]]
-                tile_x = state_position[0] + (col_idx + 1) * gap_size + col_idx * tile_size
-                tile_y = state_position[1] + ((row_idx + 1) * (gap_size + tile_size))
+                tile_x = self.position[0] + state_position[0] + (col_idx + 1) * gap_size + col_idx * tile_size
+                tile_y = self.position[1] + state_position[1] + ((row_idx + 1) * (gap_size + tile_size))
 
                 # Set batch to None for corners
                 batch = None if row_idx in extremes and col_idx in extremes else self.batch
