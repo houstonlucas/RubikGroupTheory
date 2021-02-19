@@ -89,12 +89,13 @@ class PLL_State:
         # self * other
         if type(other) == self.__class__:
             rhs_permutation = other.permutation
-        elif type(other == ndarray):
+        elif type(other) == ndarray:
             rhs_permutation = other
 
-        endPermutation = self.permutation @ rhs_permutation
-        end_tiles = get_permuted_tiles(PLL_State.solved_pll_tiles(), rhs_permutation)
-        return PLL_State(end_tiles, endPermutation)
+        resultant_permutation = self.permutation @ rhs_permutation
+        resultant_tiles = get_permuted_tiles(self.tiles, rhs_permutation)
+        resultant_state = PLL_State(resultant_tiles, resultant_permutation)
+        return resultant_state
 
     @staticmethod
     def solved_pll_tiles() -> ndarray:
@@ -110,7 +111,7 @@ class PLL_State:
         return PLL_State.color_names.index(color_name)
 
 
-class PLL_State_Drawer:
+class PLL_StateDrawer:
     batch: Batch
     rects: List[shapes.Rectangle]
 
