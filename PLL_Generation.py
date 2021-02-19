@@ -87,10 +87,12 @@ class PLL_State:
 
     def __mul__(self, other) -> PLL_State:
         # self * other
+        rhs_permutation = None
         if type(other) == self.__class__:
             rhs_permutation = other.permutation
         elif type(other) == ndarray:
             rhs_permutation = other
+        assert (rhs_permutation is not None)
 
         resultant_permutation = self.permutation @ rhs_permutation
         resultant_tiles = get_permuted_tiles(self.tiles, rhs_permutation)
