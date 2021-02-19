@@ -51,8 +51,12 @@ class PllViewer(pyglet.window.Window):
 
     def render(self):
         self.clear()
+        glPushMatrix()
+        glTranslated(0, self.height, 0)
+        glScaled(1, -1, 1)
         for drawer in self.drawers:
             drawer.draw()
+        glPopMatrix()
 
     def add_drawer(self, drawer: PllStateDrawer):
         self.drawers.append(drawer)
@@ -117,9 +121,9 @@ class PllStateDrawer:
             self.batch = Batch()
         self.rects = []
 
-    def prepare_state(self, pll_state: PllState, position: Tuple[float], width: float):
+    def prepare_state(self, pll_state: PllState, state_position: Tuple[float], width: float):
 
-        position = tuple(value - width / 2 for value in position)
+        state_position = tuple(value - width / 2 for value in state_position)
 
         r, c = pll_state.tiles.shape
         assert (r == c)
@@ -137,8 +141,8 @@ class PllStateDrawer:
             for col_idx in range(num_rows):
                 color_id = pll_state.tiles[row_idx][col_idx]
                 color = PllState.colors[PllState.color_names[color_id]]
-                tile_x = position[0] + (col_idx + 1) * gap_size + col_idx * tile_size
-                tile_y = position[1] + width - ((row_idx + 1) * (gap_size + tile_size))
+                tile_x = state_position[0] + (col_idx + 1) * gap_size + col_idx * tile_size
+                tile_y = state_position[1] + ((row_idx + 1) * (gap_size + tile_size))
 
                 # Set batch to None for corners
                 batch = None if row_idx in extremes and col_idx in extremes else self.batch
