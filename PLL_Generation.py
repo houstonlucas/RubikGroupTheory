@@ -191,7 +191,7 @@ def create_permutation_matrix(i: int, j: int, n: int) -> ndarray:
 
 def get_permuted_tiles(state: ndarray, permutation: ndarray) -> ndarray:
     state_shape = state.shape
-    return (permutation @ state.reshape(-1)).reshape(state_shape)
+    return (state.reshape(-1)@permutation).reshape(state_shape)
 
 
 if __name__ == '__main__':
