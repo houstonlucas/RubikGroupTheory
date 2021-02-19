@@ -12,24 +12,36 @@ from pyglet.gl import *
 
 
 def main():
-    window_width = 1500
-    window_height = 1500
+    window_width = 1600
+    window_height = 1600
     viewer = PllViewer(window_width, window_height)
 
     p10_14 = create_PLL_permutation(10, 14)
     p10_22 = create_PLL_permutation(10, 22)
     edge_cycle = p10_14 @ p10_22
 
-    tile_size = 250
-    top_row_drawer = PllStateDrawer(tile_size=250, position=(tile_size, 0))
-    left_col_drawer = PllStateDrawer(tile_size=250, position=(0, tile_size))
+    table_size = 3
+    table_array = []
+    for row_idx in range(table_size):
+        row = []
+        for col_idx in range(table_size):
+            row.append(PllState())
+
+        table_array.append(row)
+
+    tile_size = 300
+    top_row_drawer = PllStateDrawer(tile_size=tile_size, position=(tile_size, 0))
+    left_col_drawer = PllStateDrawer(tile_size=tile_size, position=(0, tile_size))
+    table_drawer = PllStateDrawer(tile_size=tile_size, position=(tile_size, tile_size))
 
     generated_state_list = generate_state_list(edge_cycle, 3)
     top_row_drawer.prepare_pll_list(generated_state_list)
     left_col_drawer.prepare_pll_list(generated_state_list, as_row=False)
+    table_drawer.prepare_pll_2d_array(table_array)
 
     viewer.add_drawer(top_row_drawer)
     viewer.add_drawer(left_col_drawer)
+    viewer.add_drawer(table_drawer)
 
     viewer.start()
 
@@ -157,7 +169,8 @@ class PllStateDrawer:
                 tile_y = self.position[1] + state_position[1] + ((row_idx + 1) * (gap_size + tile_size))
 
                 # Set batch to None for corners
-                batch = None if row_idx in extremes and col_idx in extremes else self.batch
+                to_draw = (row_idx in extremes) and (col_idx in extremes)
+                batch = None if to_draw else self.batch
                 rect = shapes.Rectangle(
                     tile_x, tile_y,
                     tile_size, tile_size,
@@ -165,16 +178,15 @@ class PllStateDrawer:
                 )
                 self.rects.append(rect)
 
-    def prepare_pll_list(self, pll_states: List[PllState], as_row: bool = True):
-        state_width = self.state_size
-        positions = self.__get_pll_list_positions(pll_states, as_row)
+    def prepare_pll_list(self, pll_state_list: List[PllState], as_row: bool = True):
+        positions = self.__get_pll_list_positions(pll_state_list, as_row)
 
-        for state_idx, state in enumerate(pll_states):
-            self.prepare_state(state, positions[state_idx], state_width)
+        for state_idx, state in enumerate(pll_state_list):
+            self.prepare_state(state, positions[state_idx])
 
-    def __get_pll_list_positions(self, pll_states: List[PllState], row_vector: bool = True) -> List[Tuple[float]]:
+    def __get_pll_list_positions(self, pll_state_list: List[PllState], row_vector: bool = True) -> List[Tuple[float]]:
         positions = []
-        for state_idx, state in enumerate(pll_states):
+        for state_idx, state in enumerate(pll_state_list):
             x_i = self.state_size * (state_idx + 0.5)
             y_i = self.state_size / 2.0
 
@@ -186,8 +198,35 @@ class PllStateDrawer:
             positions.append(position)
         return positions
 
+    def prepare_pll_2d_array(self, pll_states_array: List[List[PllState]]):
+        positions = self.__get_pll_2d_array_positions(pll_states_array)
+        num_rows = len(pll_states_array)
+        num_cols = len(pll_states_array[0])
+
+        for row_idx in range(num_rows):
+            for col_idx in range(num_cols):
+                self.prepare_state(pll_states_array[row_idx][col_idx], positions[row_idx][col_idx])
+
+    def __get_pll_2d_array_positions(self, pll_states_array: List[List[PllState]]) -> List[List[Tuple[float]]]:
+        position_table = []
+        num_rows = len(pll_states_array)
+        num_cols = len(pll_states_array[0])
+        for row_idx in range(num_rows):
+            row = []
+            for col_idx in range(num_cols):
+                x_i = self.state_size * (row_idx + 0.5)
+                y_i = self.state_size * (col_idx + 0.5)
+                position = tuple(map(float, (x_i, y_i)))
+                row.append(position)
+            position_table.append(row)
+        return position_table
+
     def draw(self):
         self.batch.draw()
+
+
+def tuple_cast(tup: Tuple, to_type: type):
+    return tuple(map(to_type, tup))
 
 
 def generate_state_list(permutation: ndarray, list_size: int) -> List[PllState]:
