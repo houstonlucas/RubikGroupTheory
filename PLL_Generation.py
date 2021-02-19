@@ -1,3 +1,4 @@
+from __future__ import annotations
 import random
 import time
 from typing import Tuple, List
@@ -151,6 +152,9 @@ class PLL_State_Drawer:
 
     def draw(self):
         self.batch.draw()
+
+def create_PLL_permutation(i: int, j: int) -> ndarray:
+    return create_permutation_matrix(i, j, 25)
 
 
 def create_permutation_matrix(i: int, j: int, n: int) -> ndarray:
