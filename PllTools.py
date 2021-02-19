@@ -21,7 +21,7 @@ def main():
     edge_cycle = p10_14 @ p10_22
     Pinv = edge_cycle.T
 
-    pll_state_drawer = PllStatedrawer()
+    pll_state_drawer = PllStateDrawer()
     generated_state_list = generate_state_list(edge_cycle, 3)
     pll_state_drawer.prepare_pll_list(generated_state_list, (viewer.width, viewer.height))
 
@@ -32,7 +32,7 @@ def main():
 
 class PllViewer(pyglet.window.Window):
     sim_dt: float
-    drawers: List[PllStatedrawer]
+    drawers: List[PllStateDrawer]
 
     def __init__(self, width: int, height: int):
         super(PllViewer, self).__init__(width, height)
@@ -54,7 +54,7 @@ class PllViewer(pyglet.window.Window):
         for drawer in self.drawers:
             drawer.draw()
 
-    def add_drawer(self, drawer: PllStatedrawer):
+    def add_drawer(self, drawer: PllStateDrawer):
         self.drawers.append(drawer)
 
 
@@ -108,7 +108,7 @@ class PllState:
         return PllState.color_names.index(color_name)
 
 
-class PllStatedrawer:
+class PllStateDrawer:
     batch: Batch
     rects: List[shapes.Rectangle]
 
