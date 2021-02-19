@@ -153,17 +153,26 @@ class PllStateDrawer:
                 )
                 self.rects.append(rect)
 
-    def prepare_pll_list(self, pll_states: List[PllState], draw_size: Tuple[float]):
-        tile_width, tile_height = draw_size
-        num_states = len(pll_states)
-        state_width = tile_width / num_states
+    def prepare_pll_list(self, pll_states: List[PllState], as_row: bool = True):
+        state_width = self.state_size
+        positions = self.__get_pll_list_positions(pll_states, as_row)
 
         for state_idx, state in enumerate(pll_states):
-            x_i = tile_width * (state_idx + 0.5) / num_states
-            y_i = tile_height / 2.0
-            position = tuple(map(float, (x_i, y_i)))
+            self.prepare_state(state, positions[state_idx], state_width)
 
-            self.prepare_state(state, position, state_width)
+    def __get_pll_list_positions(self, pll_states: List[PllState], row_vector: bool = True) -> List[Tuple[float]]:
+        positions = []
+        for state_idx, state in enumerate(pll_states):
+            x_i = self.state_size * (state_idx + 0.5)
+            y_i = self.state_size / 2.0
+
+            if row_vector:
+                position = tuple(map(float, (x_i, y_i)))
+            else:
+                position = tuple(map(float, (y_i, x_i)))
+
+            positions.append(position)
+        return positions
 
     def draw(self):
         self.batch.draw()
